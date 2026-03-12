@@ -105,6 +105,11 @@ const AssignmentDetailPage = () => {
   const getFileName = (file: string) => {
     return file.split("/").pop();
   };
+
+  const getFileUrl = (file: string) => {
+    if (file.startsWith("http")) return file;
+    return `https://swan-school-management-storage.s3.amazonaws.com${file}`;
+  };
   if (isPending) return <p className="text-center mt-10">Loading...</p>;
   if (!id) {
     throw new Error("Assignment ID is missing");
@@ -273,7 +278,7 @@ const AssignmentDetailPage = () => {
                               </div>
 
                               <a
-                                href={submission.file}
+                                href={getFileUrl(submission.file)}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-blue-600 text-sm font-medium hover:underline"
