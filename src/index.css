@@ -40,41 +40,53 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 }
-
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --radius: 0.625rem; /* default border radius for cards, buttons, inputs */
+  --font-theme: "Roboto Condensed", sans-serif;
+  --font-heading: "Bebas Neue", sans-serif;
+  /* Backgrounds */
+  --background: oklch(1 0 0); /* main app background */
+  --card: oklch(1 0 0); /* card, panel, table background */
+  --popover: oklch(1 0 0); /* popover, tooltip, dropdown background */
+  --input: oklch(0.922 0 0); /* input field background */
+
+  /* Foregrounds / Text */
+  --foreground: oklch(0.326 0 0); /* main text color */
+  --card-foreground: oklch(0.145 0 0); /* text inside card */
+  --popover-foreground: oklch(0.145 0 0); /* text inside popover */
+  --primary-foreground: oklch(0.985 0 0); /* text/icons on primary bg */
+  --secondary-foreground: oklch(0.205 0 0); /* text/icons on secondary bg */
+  --muted-foreground: oklch(0.556 0 0); /* text/icons on muted bg */
+  --accent-foreground: oklch(0.205 0 0); /* text/icons on accent bg */
+  --sidebar-foreground: oklch(0.418 0 0); /* text/icons for sidebar items */
+  --destructive-foreground: oklch(0.985 0 0); /* text/icons on destructive bg */
+
+  /* Primary / Actions */
+  --primary: #099885; /* main brand color / primary buttons */
+  --secondary: #cbfcf0; /* secondary buttons / secondary actions */
+  --muted: oklch(0.97 0 0); /* disabled / muted elements */
+  --accent: oklch(0.97 0 0); /* badges, highlights, notifications */
+  --destructive: oklch(0.477 0.345 27.0); /* delete/warning actions */
+
+  /* Sidebar (like primary/hover/active) */
+  --sidebar: oklch(0.985 0 0); /* sidebar default bg */
+  --sidebar-primary: #96f9e2; /* sidebar active bg */
+  --sidebar-primary-foreground: #0f6058; /* text color when active */
+  --sidebar-accent: #cbfcf0; /* sidebar hover bg */
+  --sidebar-accent-foreground: #0c796c; /* sidebar hover text */
+
+  /* Borders / Rings */
+  --border: oklch(0.922 0 0); /* default border */
+  --ring: #96f9e2; /* focus ring color */
+
+  /* Chart Colors */
+  --chart-1: oklch(0.646 0.222 41.116); /* chart/graph 1 */
+  --chart-2: oklch(0.6 0.118 184.704); /* chart/graph 2 */
+  --chart-3: oklch(0.398 0.07 227.392); /* chart/graph 3 */
+  --chart-4: oklch(0.828 0.189 84.429); /* chart/graph 4 */
+  --chart-5: oklch(0.769 0.188 70.08); /* chart/graph 5 */
 }
+
 
 .dark {
   --background: oklch(0.145 0 0);
@@ -109,6 +121,7 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 }
+
 
 @layer base {
   * {
