@@ -32,7 +32,7 @@ export const getAssignmentDetail = async (id: number) => {
 export const getAllScore = async () => {
   try {
     const response = await API.get(
-      `/student/scores/`
+      `/student/scores/chart/`
     );
     return response.data;
   } catch (error) {

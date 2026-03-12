@@ -14,7 +14,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { FieldGroup } from "@/components/ui/field";
-import { useAssignmentDetail, useUpdateAssignment } from "@/queries/teacher.query";
+import { useAssignmentDetail, useUpdateAssignment, useSubmissions, useScoreSubmission } from "@/queries/teacher.query";
 import { formatDate } from "@/util/herlper";
 import { FormInput } from "@/components/core/FormInput";
 import { FormDatePicker } from "@/components/core/FormDatePicker";
@@ -22,40 +22,6 @@ import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 
-const dummyStudents = [
-  {
-    id: 1,
-    name: "Aung Aung",
-    submitted: true,
-    score: 80,
-    attachments: [
-      "/files/react-assignment.pdf",
-      "/files/design.png",
-    ],
-  },
-  {
-    id: 2,
-    name: "Kyaw Kyaw",
-    submitted: true,
-    score: 70,
-    attachments: [
-      "/files/demo-video.mp4",
-      "/files/ui-doc.docx",
-    ],
-  },
-  {
-    id: 3,
-    name: "Htet Htet",
-    submitted: false,
-    attachments: [],
-  },
-  {
-    id: 4,
-    name: "Mya Mya",
-    submitted: false,
-    attachments: [],
-  },
-];
 const assignmentSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string({ message: "Description is required" }),
@@ -68,7 +34,10 @@ const AssignmentDetailPage = () => {
   const assignmentId = Number(id)
   const { data, isPending } = useAssignmentDetail(assignmentId);
   const { mutate } = useUpdateAssignment();
+  const { data: submissionsData } = useSubmissions(assignmentId);
+  const { mutate: scoreMutate, isPending: isScoring } = useScoreSubmission();
   const [open, setOpen] = useState(false);
+  const [scores, setScores] = useState<Record<number, number | "">>({});
   const form = useForm({
     defaultValues: {
       title: "",
@@ -105,23 +74,24 @@ const AssignmentDetailPage = () => {
   };
 
   const assignment = data?.data;
-  console.log(assignment)
+  const submissions: SubmissionDetail[] = submissionsData?.data || [];
   const navigate = useNavigate();
-  const isOverdue = assignment?.is_closed
+  const isOverdue = assignment?.is_closed;
 
   const [activeTab, setActiveTab] = useState<"submitted" | "unsubmitted">(
     "submitted"
   );
-  const [students, setStudents] = useState(dummyStudents);
 
-  const updateScore = (studentId: number, newScore: number) => {
-    setStudents((prev) =>
-      prev.map((s) => (s.id === studentId ? { ...s, score: newScore } : s))
-    );
+  const unsubmittedCount = (assignment?.totalStudents ?? 0) - submissions.length;
+
+  const handleScoreSave = (submission: SubmissionDetail) => {
+    const score = scores[submission.submission_id];
+    if (score === "" || score === undefined) return;
+    scoreMutate({
+      submissionId: submission.submission_id,
+      data: { studentId: submission.student, score: Number(score) },
+    });
   };
-
-  const submittedStudents = students.filter((s) => s.submitted);
-  const unsubmittedStudents = students.filter((s) => !s.submitted);
 
   const getFileIcon = (file: string) => {
     const ext = file.split(".").pop()?.toLowerCase();
@@ -220,7 +190,7 @@ const AssignmentDetailPage = () => {
         </Dialog>
 
       </div>
-      {assignment?.submissions.length > 0 ? (
+      {assignment?.submissions > 0 ? (
         <>
           {/* Tabs */}
           <div className="flex space-x-4 border-b pb-2 mt-4">
@@ -231,7 +201,7 @@ const AssignmentDetailPage = () => {
                 }`}
               onClick={() => setActiveTab("submitted")}
             >
-              Submitted Students ({submittedStudents.length})
+              Submitted Students ({submissions.length})
             </button>
 
             <button
@@ -241,7 +211,7 @@ const AssignmentDetailPage = () => {
                 }`}
               onClick={() => setActiveTab("unsubmitted")}
             >
-              Unsubmitted Students ({unsubmittedStudents.length})
+              Unsubmitted Students ({unsubmittedCount})
             </button>
           </div>
 
@@ -249,30 +219,35 @@ const AssignmentDetailPage = () => {
           <div className="bg-white p-4 rounded-lg shadow space-y-3">
             {/* Submitted Students */}
             {activeTab === "submitted" &&
-              submittedStudents.map((student) => (
+              submissions.map((submission: SubmissionDetail) => (
                 <div
-                  key={student.id}
+                  key={submission.submission_id}
                   className="flex items-center justify-between p-3 border rounded"
                 >
-                  <span>{student.name}</span>
+                  <span>{submission.student_name}</span>
 
                   <div className="flex items-center gap-2">
                     {/* Score Input */}
                     <Input
                       type="number"
-                      value={student.score ?? ""}
+                      value={scores[submission.submission_id] ?? submission.score ?? ""}
                       onChange={(e) =>
-                        setStudents((prev) =>
-                          prev.map((s) =>
-                            s.id === student.id
-                              ? { ...s, score: Number(e.target.value) }
-                              : s
-                          )
-                        )
+                        setScores((prev) => ({
+                          ...prev,
+                          [submission.submission_id]: e.target.value === "" ? "" : Number(e.target.value),
+                        }))
                       }
                       placeholder="Score"
                       className="w-20"
                     />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleScoreSave(submission)}
+                      disabled={isScoring}
+                    >
+                      {isScoring ? "..." : "Save"}
+                    </Button>
 
                     {/* Detail Modal */}
                     <Dialog>
@@ -284,32 +259,28 @@ const AssignmentDetailPage = () => {
 
                       <DialogContent className="sm:max-w-md">
                         <DialogHeader>
-                          <DialogTitle>{student.name} Submission</DialogTitle>
+                          <DialogTitle>{submission.student_name} Submission</DialogTitle>
                         </DialogHeader>
 
-                        {student.attachments && student.attachments.length > 0 ? (
+                        {submission.file ? (
                           <div className="space-y-2 mt-4">
-                            {student.attachments.map((file, index) => (
-                              <div
-                                key={index}
-                                className="flex items-center justify-between border rounded p-2"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <span className="text-lg">{getFileIcon(file)}</span>
-                                  <span className="text-sm font-medium">
-                                    {getFileName(file)}
-                                  </span>
-                                </div>
-
-                                <a
-                                  href={file}
-                                  target="_blank"
-                                  className="text-blue-600 text-sm font-medium hover:underline"
-                                >
-                                  Open
-                                </a>
+                            <div className="flex items-center justify-between border rounded p-2">
+                              <div className="flex items-center gap-2">
+                                <span className="text-lg">{getFileIcon(submission.file)}</span>
+                                <span className="text-sm font-medium">
+                                  {getFileName(submission.file)}
+                                </span>
                               </div>
-                            ))}
+
+                              <a
+                                href={submission.file}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 text-sm font-medium hover:underline"
+                              >
+                                Open
+                              </a>
+                            </div>
                           </div>
                         ) : (
                           <p className="text-muted-foreground mt-4">
@@ -327,12 +298,11 @@ const AssignmentDetailPage = () => {
               ))}
 
             {/* Unsubmitted Students */}
-            {activeTab === "unsubmitted" &&
-              unsubmittedStudents.map((student) => (
-                <div key={student.id} className="p-2 border rounded">
-                  {student.name}
-                </div>
-              ))}
+            {activeTab === "unsubmitted" && (
+              <p className="text-gray-500 text-center py-4">
+                {unsubmittedCount} student(s) haven't submitted yet.
+              </p>
+            )}
           </div>
         </>
       ) : (

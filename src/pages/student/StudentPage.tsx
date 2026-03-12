@@ -101,6 +101,13 @@ const StudentPage = () => {
                 {assignment.description}
               </p>
 
+              {assignment.score !== null && assignment.score !== undefined && (
+                <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 bg-teal-50 border border-teal-200 rounded-lg">
+                  <span className="text-sm font-medium text-teal-700">Score:</span>
+                  <span className="text-sm font-bold text-teal-900">{assignment.score}</span>
+                </div>
+              )}
+
               <Separator className="my-6" />
 
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 text-sm text-gray-600">

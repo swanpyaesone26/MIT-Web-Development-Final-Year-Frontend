@@ -39,9 +39,21 @@ export const updateAssignment = async (id: number, data: AssignmentPayload) => {
   }
 };
 
-export const getAssignmentSubmissions = async (assignmentId: number,data : Submission)=> {
-  const response = await API.get<{ data: Submission }>(
-    `/teacher/assignments/${assignmentId}/submissions/`
-  );
-  return response.data.data;
+export const getAssignmentSubmissions = async (assignmentId: number) => {
+  try {
+    const response = await API.get(`/teacher/assignments/${assignmentId}/submissions/`);
+    return response.data;
+  } catch (error) {
+    HelperError(error);
+  }
+};
+
+export const scoreSubmission = async (submissionId: number, data: { studentId: number; score: number }) => {
+  try {
+    const response = await API.patch(`/teacher/submissions/${submissionId}/score/`, data);
+    return response.data;
+  } catch (error) {
+    HelperError(error);
+    throw error;
+  }
 };

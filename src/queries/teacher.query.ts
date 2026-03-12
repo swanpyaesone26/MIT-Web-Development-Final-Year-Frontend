@@ -1,5 +1,5 @@
 import { errorToast, successToast } from "@/lib/toast";
-import { createAssignment, getAllAssignment, getAssignmentDetail, updateAssignment } from "@/services/teacher";
+import { createAssignment, getAllAssignment, getAssignmentDetail, getAssignmentSubmissions, scoreSubmission, updateAssignment } from "@/services/teacher";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const useAssignment = () => {
@@ -53,6 +53,29 @@ export const useUpdateAssignment = () => {
     },
      onError: (err) => {
       errorToast("Update Assignment Failed!!", err.message);
+    },
+  });
+};
+
+export const useSubmissions = (assignmentId: number) => {
+  return useQuery({
+    queryKey: ["submissions", assignmentId],
+    queryFn: () => getAssignmentSubmissions(assignmentId),
+    enabled: !!assignmentId,
+  });
+};
+
+export const useScoreSubmission = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ submissionId, data }: { submissionId: number; data: { studentId: number; score: number } }) =>
+      scoreSubmission(submissionId, data),
+    onSuccess: () => {
+      successToast("Successful", "Score updated successfully.");
+      queryClient.invalidateQueries({ queryKey: ["submissions"] });
+    },
+    onError: (err) => {
+      errorToast("Score Update Failed!", err.message);
     },
   });
 };

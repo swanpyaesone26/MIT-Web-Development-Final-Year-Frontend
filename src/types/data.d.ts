@@ -72,4 +72,16 @@ type Submission = {
   submitted: true;
 }
 
+type SubmissionDetail = {
+  submission_id: number;
+  assignment: number;
+  assignment_name: string;
+  student: number;
+  student_name: string;
+  file: string;
+  score: number | null;
+  submitted_at: string;
+  updated_at: string;
+}
+
 }
